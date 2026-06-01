@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dj-scaffold"
+version = "1.0.0"
+description = "Interactive enterprise scaffolding tool for Dockerized Django applications."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Framework :: Django",
+]
+dependencies = [
+    "typer>=0.9.0",
+    "questionary>=2.0.1",
+    "rich>=13.0.0",
+    "jinja2>=3.1.2",
+    "django>=4.2.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-mock>=3.10.0"
+]
+
+[project.scripts]
+dj-scaffold = "dj_scaffold.main:main"
+
+[tool.setuptools]
+package-data = { "dj_scaffold" = ["templates/**/*", "templates/**/.*"] }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dj_scaffold*"]

@@ -1,0 +1,2 @@
+[console_scripts]
+dj-scaffold = dj_scaffold.main:main

@@ -1,0 +1,23 @@
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+]
+
+{% if "ninja" in flavor -%}
+from ninja import NinjaAPI
+api = NinjaAPI(title="{{ project_name }} API")
+# Add router inclusions dynamically here
+
+urlpatterns += [
+    path("api/", api.urls),
+]
+{%- elif "drf" in flavor -%}
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
+urlpatterns += [
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+]
+{%- endif %}
