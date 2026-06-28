@@ -18,7 +18,7 @@ A modern, interactive scaffolding CLI for Django projects, inspired by frontend 
 The easiest way to install `dj-scaffold` is from PyPI:
 
 ```bash
-pip install dj-scaffold
+pip install dj-scaffold-imhotep
 ```
 
 *(For local development: clone the repository and run `pip install -e .`)*
