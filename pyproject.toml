@@ -4,10 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dj-scaffold-imhotep"
-version = "1.0.0"
+version = "1.0.1"
 description = "Interactive enterprise scaffolding tool for Dockerized Django applications."
 readme = "README.md"
 requires-python = ">=3.10"
+authors = [
+    { name = "Imhotep-Tech", email = "karimbassemj@gmail.com" } # Feel free to change the email
+]
+license = { text = "MIT" }
+
+[project.urls]
+Homepage = "https://github.com/Imhotep-Tech/dj-scaffold"
+Repository = "https://github.com/Imhotep-Tech/dj-scaffold"
+
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -15,16 +24,16 @@ classifiers = [
     "Framework :: Django",
 ]
 dependencies = [
-    "typer>=0.9.0",
+    "typer>=0.26.0",
     "questionary>=2.0.1",
-    "rich>=13.0.0",
+    "rich>=15.0.0",
     "jinja2>=3.1.2",
-    "django>=4.2.0"
+    "django>=6.0.6"
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0.0",
+    "pytest>=9.1.1",
     "pytest-mock>=3.10.0"
 ]
 
