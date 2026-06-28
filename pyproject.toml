@@ -13,10 +13,6 @@ authors = [
 ]
 license = { text = "MIT" }
 
-[project.urls]
-Homepage = "https://github.com/Imhotep-Tech/dj-scaffold"
-Repository = "https://github.com/Imhotep-Tech/dj-scaffold"
-
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -30,6 +26,10 @@ dependencies = [
     "jinja2>=3.1.2",
     "django>=6.0.6"
 ]
+
+[project.urls]
+Homepage = "https://github.com/Imhotep-Tech/dj-scaffold"
+Repository = "https://github.com/Imhotep-Tech/dj-scaffold"
 
 [project.optional-dependencies]
 dev = [
