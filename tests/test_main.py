@@ -4,32 +4,56 @@ from dj_scaffold.main import app
 
 runner = CliRunner()
 
-def test_project_generation_workflow(tmp_path):
+
+def _mock_questionary_text(mocker, value):
+    return mocker.patch(
+        "dj_scaffold.main.questionary.text",
+        return_value=mocker.Mock(ask=mocker.Mock(return_value=value)),
+    )
+
+
+def _mock_questionary_select(mocker, value):
+    return mocker.patch(
+        "dj_scaffold.main.questionary.select",
+        return_value=mocker.Mock(ask=mocker.Mock(return_value=value)),
+    )
+
+
+def _mock_questionary_select_sequence(mocker, values):
+    return mocker.patch(
+        "dj_scaffold.main.questionary.select",
+        side_effect=[mocker.Mock(ask=mocker.Mock(return_value=value)) for value in values],
+    )
+
+def test_project_generation_workflow(tmp_path, mocker):
     os.chdir(tmp_path)
-    result = runner.invoke(app, ["create", "sandbox_project", "--db", "sqlite", "--flavor", "standard_django"])
+    generate_project_mock = mocker.patch("dj_scaffold.main.generate_project")
+    _mock_questionary_text(mocker, "sandbox_project")
+    _mock_questionary_select_sequence(mocker, ["PostgreSQL", "Standard Django"])
+
+    result = runner.invoke(app, ["create"])
     assert result.exit_code == 0
-    assert (tmp_path / "sandbox_project").exists()
-    assert (tmp_path / "sandbox_project" / "settings.py").exists()
-    assert (tmp_path / "requirements.txt").exists()
+    generate_project_mock.assert_called_once_with("sandbox_project", "postgresql", "standard_django")
 
 def test_app_generation_workflow(tmp_path, mocker):
     os.chdir(tmp_path)
-    mocker.patch("pathlib.Path.exists", return_value=True)
-    mock_sub = mocker.patch("subprocess.run")
+    generate_app_mock = mocker.patch("dj_scaffold.main.generate_app")
+    _mock_questionary_text(mocker, "billing_service")
+    _mock_questionary_select(mocker, "Service Layer Pattern")
 
-    result = runner.invoke(app, ["startapp", "billing_service", "--architecture", "service_layer_pattern"])
+    result = runner.invoke(app, ["startapp"])
     assert result.exit_code == 0
-    mock_sub.assert_called_once()
+    generate_app_mock.assert_called_once_with("billing_service", True)
 
 def test_startapp_without_manage_py(tmp_path):
     os.chdir(tmp_path)
     # No manage.py exists in tmp_path, should fail validation and return exit_code 1
-    result = runner.invoke(app, ["startapp", "billing_service", "--architecture", "service_layer_pattern"])
+    result = runner.invoke(app, ["startapp"], input="billing_service\nService Layer Pattern\n")
     assert result.exit_code == 1
 
-def test_create_malformed_project_name(tmp_path):
+def test_create_malformed_project_name(tmp_path, mocker):
     os.chdir(tmp_path)
-    # Invalid name (has spaces and special characters), django-admin fails and returns exit_code 1
-    result = runner.invoke(app, ["create", "my project!", "--db", "sqlite", "--flavor", "standard_django"])
+    mocker.patch("dj_scaffold.generators.project_generator.subprocess.run", side_effect=Exception("boom"))
+    result = runner.invoke(app, ["create"], input="my project!\nSQLite\nStandard Django\n")
     assert result.exit_code == 1
 

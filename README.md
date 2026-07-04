@@ -1,4 +1,4 @@
-# dj-scaffold 🚀
+# dj-scaffold
 
 A modern, interactive scaffolding CLI for Django projects, inspired by frontend tools like `create-next-app`. It helps developers set up containerized, production-ready Django applications and enforces a clean **Service Layer Architecture** for modular, testable django applications.
 
@@ -27,15 +27,17 @@ pip install dj-scaffold-imhotep
 
 ## Usage
 
+Run `dj-scaffold` with no flags to open the interactive wizard. Use the arrow keys to move between choices and press Enter to confirm.
+
 ### 1. Creating a New Django Project
 
-To create a new project:
+To create a new project, run:
 
 ```bash
-dj-scaffold create [project_name]
+dj-scaffold create
 ```
 
-If the project name is omitted, you will be prompted to enter one. The interactive shell will then guide you through selecting the database and API framework.
+The CLI will prompt you for the project name, database engine, and API framework.
 
 #### Commands run under the hood:
 1. Standard `django-admin startproject` setup.
@@ -44,13 +46,13 @@ If the project name is omitted, you will be prompted to enter one. The interacti
 
 ### 2. Creating a New Service App
 
-To create a new app:
+To create a new app, run:
 
 ```bash
-dj-scaffold startapp [app_name]
+dj-scaffold startapp
 ```
 
-If the app name is omitted, you will be prompted. You will then select whether you want a **Standard Django** app or a **Service Layer Pattern** app.
+The CLI will prompt you for the app name and architecture style.
 
 Under the Service Layer selection, the following file structure is created:
 ```text

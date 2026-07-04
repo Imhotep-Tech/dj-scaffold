@@ -7,66 +7,76 @@ from dj_scaffold.generators.app_generator import generate_app
 app = typer.Typer(help="Modern Interactive Django Scaffolder")
 console = Console()
 
+
+def _normalize_choice(value: str) -> str:
+    return value.lower().replace(" + ", "_").replace(" ", "_")
+
+
+def _prompt_text(message: str, error_message: str) -> str:
+    value = questionary.text(message).ask()
+    if not value:
+        console.print(f"[red]{error_message}[/red]")
+        raise typer.Exit(1)
+    return value
+
+
+def _prompt_select(message: str, choices: list[str]) -> str:
+    value = questionary.select(message, choices=choices).ask()
+    if not value:
+        raise typer.Exit(1)
+    return value
+
+
+@app.callback(invoke_without_command=True)
+def prompt_shell(ctx: typer.Context):
+    if ctx.invoked_subcommand:
+        return
+
+    action = _prompt_select(
+        "What would you like to create?",
+        choices=["New Django project", "New Django app"],
+    )
+
+    if action == "New Django project":
+        create()
+        return
+
+    if action == "New Django app":
+        startapp()
+        return
+
 @app.command()
-def create(
-    project_name: str = typer.Argument(None, help="Name of your Django project"),
-    db: str = typer.Option(None, "--db", help="Database Engine (PostgreSQL, MySQL, SQLite)"),
-    flavor: str = typer.Option(None, "--flavor", help="API Framework Flavor (Django Ninja, DRF + Spectacular, Standard Django)"),
-):
+def create():
     """
     Creates a new customized, Dockerized Django project.
     """
-    if not project_name:
-        project_name = questionary.text("Enter project name:").ask()
-        if not project_name:
-            console.print("[red]Error: Project name cannot be empty.[/red]")
-            raise typer.Exit(1)
+    project_name = _prompt_text("Enter project name:", "Error: Project name cannot be empty.")
+    db = _prompt_select(
+        "Select Database Engine:",
+        choices=["PostgreSQL", "MySQL", "SQLite"],
+    )
+    flavor = _prompt_select(
+        "Select API Framework Flavor:",
+        choices=["Django Ninja", "DRF + Spectacular", "Standard Django"],
+    )
 
-    if not db:
-        db = questionary.select(
-            "Select Database Engine:",
-            choices=["PostgreSQL", "MySQL", "SQLite"]
-        ).ask()
-        if not db:
-            raise typer.Exit(1)
-
-    if not flavor:
-        flavor = questionary.select(
-            "Select API Framework Flavor:",
-            choices=["Django Ninja", "DRF + Spectacular", "Standard Django"]
-        ).ask()
-        if not flavor:
-            raise typer.Exit(1)
-
-    db_clean = db.lower().replace(" + ", "_").replace(" ", "_")
-    flavor_clean = flavor.lower().replace(" + ", "_").replace(" ", "_")
+    db_clean = _normalize_choice(db)
+    flavor_clean = _normalize_choice(flavor)
 
     generate_project(project_name, db_clean, flavor_clean)
 
 @app.command()
-def startapp(
-    app_name: str = typer.Argument(None, help="Name of the Django app"),
-    architecture: str = typer.Option(None, "--architecture", "-a", help="App Architecture Layout (Service Layer Pattern, Standard Django)"),
-):
+def startapp():
     """
     Creates a new Django application config.
     """
-    if not app_name:
-        app_name = questionary.text("Enter app name:").ask()
-        if not app_name:
-            console.print("[red]Error: App name cannot be empty.[/red]")
-            raise typer.Exit(1)
+    app_name = _prompt_text("Enter app name:", "Error: App name cannot be empty.")
+    architecture = _prompt_select(
+        "Select App Architecture Layout:",
+        choices=["Service Layer Pattern", "Standard Django Layout"],
+    )
 
-    if not architecture:
-        arch = questionary.select(
-            "Select App Architecture Layout:",
-            choices=["Service Layer Pattern", "Standard Django Layout"]
-        ).ask()
-        if not arch:
-            raise typer.Exit(1)
-        is_service = "Service" in arch
-    else:
-        is_service = "service" in architecture.lower()
+    is_service = "service" in _normalize_choice(architecture)
 
     generate_app(app_name, is_service)
 
