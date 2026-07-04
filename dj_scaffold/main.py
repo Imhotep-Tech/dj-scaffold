@@ -8,21 +8,31 @@ app = typer.Typer(help="Modern Interactive Django Scaffolder")
 console = Console()
 
 
+import re
+
 def _normalize_choice(value: str) -> str:
     return value.lower().replace(" + ", "_").replace(" ", "_")
 
 
+def _validate_identifier(text: str):
+    if not text:
+        return "Input cannot be empty."
+    sanitized = text.replace("-", "_").replace(" ", "_")
+    if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", sanitized):
+        return "Must contain only letters, numbers, underscores, hyphens, or spaces (starting with a letter or underscore)."
+    return True
+
+
 def _prompt_text(message: str, error_message: str) -> str:
-    value = questionary.text(message).ask()
-    if not value:
-        console.print(f"[red]{error_message}[/red]")
+    value = questionary.text(message, validate=_validate_identifier).ask()
+    if value is None:
         raise typer.Exit(1)
     return value
 
 
 def _prompt_select(message: str, choices: list[str]) -> str:
     value = questionary.select(message, choices=choices).ask()
-    if not value:
+    if value is None:
         raise typer.Exit(1)
     return value
 
@@ -51,6 +61,7 @@ def create():
     Creates a new customized, Dockerized Django project.
     """
     project_name = _prompt_text("Enter project name:", "Error: Project name cannot be empty.")
+    project_name = project_name.replace("-", "_").replace(" ", "_")
     db = _prompt_select(
         "Select Database Engine:",
         choices=["PostgreSQL", "MySQL", "SQLite"],
@@ -71,6 +82,7 @@ def startapp():
     Creates a new Django application config.
     """
     app_name = _prompt_text("Enter app name:", "Error: App name cannot be empty.")
+    app_name = app_name.replace("-", "_").replace(" ", "_")
     architecture = _prompt_select(
         "Select App Architecture Layout:",
         choices=["Service Layer Pattern", "Standard Django Layout"],

@@ -54,6 +54,6 @@ def test_startapp_without_manage_py(tmp_path):
 def test_create_malformed_project_name(tmp_path, mocker):
     os.chdir(tmp_path)
     mocker.patch("dj_scaffold.generators.project_generator.subprocess.run", side_effect=Exception("boom"))
-    result = runner.invoke(app, ["create"], input="my project!\nSQLite\nStandard Django\n")
+    result = runner.invoke(app, ["create"], input="valid_but_fails\nSQLite\nStandard Django\n")
     assert result.exit_code == 1
 
