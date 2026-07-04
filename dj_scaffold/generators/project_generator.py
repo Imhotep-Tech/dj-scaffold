@@ -46,8 +46,16 @@ def generate_project(name: str, db: str, flavor: str):
     with open("Dockerfile", "w") as f:
         f.write(env.get_template("Dockerfile.jinja").render(context))
 
+    with open("entrypoint.sh", "w") as f:
+        f.write(env.get_template("entrypoint.sh.jinja").render(context))
+
     # Construct clean requirements dynamic manifest
-    reqs = ["django>=4.2.0\n", "python-dotenv>=1.0.0\n"]
+    reqs = [
+        "django>=4.2.0\n",
+        "python-dotenv>=1.0.0\n",
+        "django-cors-headers>=4.4.0\n",
+        "django-csp>=4.0\n",
+    ]
     if "postgres" in db:
         reqs.append("psycopg2-binary>=2.9.0\n")
         shutil.copy(template_base / "docker-compose.postgres.yml.jinja", "docker-compose.yml")
@@ -60,6 +68,7 @@ def generate_project(name: str, db: str, flavor: str):
     elif "drf" in flavor:
         reqs.append("djangorestframework>=3.14.0\n")
         reqs.append("drf-spectacular>=0.26.0\n")
+        reqs.append("djangorestframework-simplejwt>=5.5.1\n")
 
     with open("requirements.txt", "w") as f:
         f.writelines(reqs)

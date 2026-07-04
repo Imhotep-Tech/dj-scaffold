@@ -12,7 +12,9 @@ A modern, interactive scaffolding CLI for Django projects, inspired by frontend 
 ## Features
 
 - ✨ **Interactive Prompts**: Quick setup via terminal menus using arrow keys.
-- 🐳 **Dockerized by Default**: Generate production-ready `Dockerfile`, `.env` setups, and `docker-compose.yml` for PostgreSQL or MySQL.
+- 🐳 **Dockerized & Auto-Provisioned**: Generate production-ready `Dockerfile`, `.env` setups, and `docker-compose.yml`. Executes database migrations and provisions a superuser automatically on startup.
+- 🛡️ **Secure by Default**: Configures CORS (`django-cors-headers`) and Content Security Policy (`django-csp`) middleware out-of-the-box.
+- 🔑 **Simple JWT Integration**: Auto-configures token-based authentication (`djangorestframework-simplejwt`) and endpoint routes if an API backend is selected.
 - 🛠️ **API Flavors**: Choose from **Standard Django**, **Django REST Framework + Spectacular** (OpenAPI 3.0), or **Django Ninja**.
 - 🏗️ **Service Layer Architecture**: Scaffolding for app structure segregating HTTP API route handlers (`apis.py`), Business Logic mutations (`services.py`), Database Queries (`selectors.py`), and Models (`models.py`).
 
@@ -62,14 +64,53 @@ The CLI will guide you through:
 - **Database Engine**: Choose between **PostgreSQL**, **MySQL**, or **SQLite**.
 - **API Framework Flavor**: Choose between **Django Ninja**, **DRF + Spectacular**, or **Standard Django**.
 
-#### Under the Hood:
-1. Runs `django-admin startproject` to generate the default base.
-2. Replaces core configurations with optimized Django settings (`settings.py`, `urls.py`) using Jinja templates.
-3. Generates Docker configuration files (`Dockerfile`, `docker-compose.yml` configured for your database).
-4. Generates `.env.example` and automatically copies it to `.env`.
-5. Creates a `requirements.txt` preloaded with the correct packages based on your database and API style choices.
+---
 
-### 3. Creating a New App (Scaffolding layout)
+## Generated Project Configuration
+
+When you scaffold a new project, `dj-scaffold` sets up the following environments:
+
+### 1. Docker & Auto-Superuser Setup
+The generated project uses a custom `entrypoint.sh` script to run migrations and create a superuser automatically when you run `docker compose up`. 
+
+Configure the superuser credentials in your generated `.env` file:
+```ini
+DJANGO_SUPERUSER_USERNAME=admin
+DJANGO_SUPERUSER_PASSWORD=adminpassword
+DJANGO_SUPERUSER_EMAIL=admin@example.com
+```
+
+### 2. Security Middleware (CORS & CSP)
+Every project has CORS and CSP configured by default in its generated `settings.py`:
+- **CORS**: Powered by `django-cors-headers`, pre-configured with `CORS_ALLOW_ALL_ORIGINS = True` for easy API testing during development.
+- **CSP**: Powered by `django-csp`, setting secure default script, style, and self-origin policies:
+  ```python
+  CSP_DEFAULT_SRC = ("'self'",)
+  CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
+  CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'")
+  ```
+
+### 3. API Authentication (Simple JWT)
+If the **DRF + Spectacular** flavor is chosen, token-based authentication is preconfigured.
+- **Settings**: Simple JWT config is added to `REST_FRAMEWORK` and settings:
+  ```python
+  REST_FRAMEWORK = {
+      'DEFAULT_AUTHENTICATION_CLASSES': [
+          'rest_framework_simplejwt.authentication.JWTAuthentication',
+      ],
+      'DEFAULT_PERMISSION_CLASSES': [
+          'rest_framework.permissions.IsAuthenticated',
+      ],
+  }
+  ```
+- **Endpoints**: The following routes are registered in your main `urls.py`:
+  - `/api/token/` – Exchange username/password for access/refresh tokens.
+  - `/api/token/refresh/` – Exchange a refresh token for a new access token.
+
+---
+
+## Scaffolding a New App (Service Layer Layout)
+
 To create a new app inside an existing project, run this command from the project root directory (where `manage.py` resides):
 ```bash
 dj-scaffold startapp
@@ -77,6 +118,18 @@ dj-scaffold startapp
 You will be prompted for:
 - **App Name**: Enter the name of the app.
 - **Architecture Layout**: Choose between **Service Layer Pattern** (recommended) or **Standard Django Layout**.
+
+### Folder Structure for Service Layer Apps:
+```text
+your_app/
+├── __init__.py
+├── apps.py          # Django app configuration
+├── models.py        # Database models & relationships
+├── apis.py          # API ViewSets, Ninja Routers, or standard views
+├── services.py      # Business logic mutators (Write actions)
+├── selectors.py     # Pure database query helpers (Read actions)
+└── urls.py          # App-specific URL patterns
+```
 
 ---
 
@@ -94,18 +147,6 @@ Request ──> APIs (apis.py) ──> Services (services.py) [Mutations] ──
 2. **Services** (`services.py`): Contains your core business logic and database mutators (creating, updating, deleting database records). Wrapped in `@transaction.atomic` to ensure transactional integrity.
 3. **Selectors** (`selectors.py`): Contains pure database query functions. They read and return QuerySets or dictionaries/objects and do not mutate state.
 4. **Models** (`models.py`): Pure schema definitions, database relationships, and constraints. Contains minimal or zero business logic.
-
-### Folder Structure for Service Layer Apps:
-```text
-your_app/
-├── __init__.py
-├── apps.py          # Django app configuration
-├── models.py        # Database models & relationships
-├── apis.py          # API ViewSets, Ninja Routers, or standard views
-├── services.py      # Business logic mutators (Write actions)
-├── selectors.py     # Pure database query helpers (Read actions)
-└── urls.py          # App-specific URL patterns
-```
 
 ---
 
