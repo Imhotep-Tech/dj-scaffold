@@ -75,6 +75,38 @@ def generate_project(name: str, db: str, flavor: str):
     with open("requirements.txt", "w") as f:
         f.writelines(reqs)
 
+    # Scaffold example app
+    try:
+        from dj_scaffold.generators.app_generator import generate_app
+        generate_app("example", is_service=True)
+        
+        # Populate with simple example code
+        with open("example/models.py", "w") as f:
+            f.write("from django.db import models\n\nclass ExampleItem(models.Model):\n    name = models.CharField(max_length=255)\n    description = models.TextField(blank=True)\n    created_at = models.DateTimeField(auto_now_add=True)\n\n    def __str__(self):\n        return self.name\n")
+            
+        with open("example/apis.py", "w") as f:
+            if "drf" in flavor:
+                f.write("from rest_framework.views import APIView\nfrom rest_framework.response import Response\nfrom .models import ExampleItem\n\nclass ExampleItemApi(APIView):\n    def get(self, request):\n        items = ExampleItem.objects.all().values('id', 'name', 'description')\n        return Response(list(items))\n")
+            elif "ninja" in flavor:
+                f.write("from ninja import Router\nfrom .models import ExampleItem\n\nrouter = Router()\n\n@router.get('/items/')\ndef example_list(request):\n    items = list(ExampleItem.objects.all().values('id', 'name', 'description'))\n    return items\n")
+            else:
+                f.write("from django.http import JsonResponse\nfrom .models import ExampleItem\n\ndef example_list(request):\n    items = list(ExampleItem.objects.all().values('id', 'name', 'description'))\n    return JsonResponse(items, safe=False)\n")
+                
+        with open("example/urls.py", "w") as f:
+            if "drf" in flavor:
+                f.write("from django.urls import path\nfrom . import apis\n\nurlpatterns = [\n    path('items/', apis.ExampleItemApi.as_view()),\n]\n")
+            elif "ninja" in flavor:
+                f.write("from django.urls import path\n\nurlpatterns = [\n    # For Django Ninja, register the router in your main urls.py instead:\n    # api.add_router('/example/', 'example.apis.router')\n]\n")
+                urls_path = Path(name) / "urls.py"
+                if urls_path.exists():
+                    urls_content = urls_path.read_text()
+                    urls_content = urls_content.replace("# Add router inclusions dynamically here", "# Add router inclusions dynamically here\napi.add_router('/example/', 'example.apis.router')")
+                    urls_path.write_text(urls_content)
+            else:
+                f.write("from django.urls import path\nfrom . import apis\n\nurlpatterns = [\n    path('items/', apis.example_list),\n]\n")
+    except Exception as e:
+        console.print(f"[yellow]Warning: Could not scaffold example app: {e}[/yellow]")
+
     console.print(Panel(
         f"[green]Successfully scaffolded {name}![/green]\n\n"
         f"Database: [bold]{db}[/bold]\n"
