@@ -62,6 +62,8 @@ def generate_project(name: str, db: str, flavor: str):
     elif "mysql" in db:
         reqs.append("mysqlclient>=2.2.0\n")
         shutil.copy(template_base / "docker-compose.mysql.yml.jinja", "docker-compose.yml")
+    else:
+        shutil.copy(template_base / "docker-compose.sqlite.yml.jinja", "docker-compose.yml")
 
     if "ninja" in flavor:
         reqs.append("django-ninja>=1.1.0\n")
