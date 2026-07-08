@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dj-scaffold-imhotep"
-version = "1.0.8"
+version = "1.0.9"
 description = "Interactive enterprise scaffolding tool for Dockerized Django applications."
 readme = "README.md"
 requires-python = ">=3.10"
