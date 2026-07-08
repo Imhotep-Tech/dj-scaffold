@@ -83,10 +83,14 @@ DATABASES = {
 CORS_ALLOW_ALL_ORIGINS = True
 
 # Content Security Policy configuration
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
-CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
-CSP_IMG_SRC = ("'self'", "https://cdn.jsdelivr.net", "data:")
+CONTENT_SECURITY_POLICY = {
+    'DIRECTIVES': {
+        'default-src': ("'self'",),
+        'img-src': ("'self'", 'https://cdn.jsdelivr.net', 'data:'),
+        'script-src': ("'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'),
+        'style-src': ("'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'),
+    }
+}
 
 {% if "drf" in flavor -%}
 REST_FRAMEWORK = {
