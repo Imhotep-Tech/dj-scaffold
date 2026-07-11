@@ -48,5 +48,25 @@ Dive deep into what `dj-scaffold` does under the hood. Check out our detailed do
 - 📡 [**API Framework Flavors**](docs/api-flavors.md) – Learn about DRF, Django Ninja, and Standard Django setups.
 - 🏗️ [**Architecture Layouts**](docs/architecture-layout.md) – Deep dive into the Service Layer pattern vs Standard layout.
 
+## 🛠️ Local Development & Testing
+
+To set up the CLI tool for local development:
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Imhotep-Tech/dj-scaffold.git
+   cd dj-scaffold
+   ```
+
+2. **Install in editable mode with development dependencies**:
+   ```bash
+   pip install -e .[dev]
+   ```
+
+3. **Run the test suite**:
+   ```bash
+   pytest -v
+   ```
+
 ---
 *If you want to contribute to the project, please see our `CONTRIBUTING.md` file.*
