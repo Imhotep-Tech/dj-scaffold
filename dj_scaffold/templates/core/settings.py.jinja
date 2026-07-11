@@ -18,10 +18,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'csp',
-{% if "drf" in flavor -%}
+{% if "drf" in flavor %}
     'rest_framework',
     'drf_spectacular',
-{%- endif %}
+{% endif %}
 ]
 
 MIDDLEWARE = [
@@ -58,24 +58,24 @@ WSGI_APPLICATION = '{{ project_name }}.wsgi.application'
 
 DATABASES = {
     'default': {
-{% if "postgres" in db -%}
+{% if "postgres" in db %}
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME', 'postgres'),
         'USER': os.getenv('DB_USER', 'postgres'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
         'HOST': os.getenv('DB_HOST', 'db'),
         'PORT': os.getenv('DB_PORT', '5432'),
-{%- elif "mysql" in db -%}
+{% elif "mysql" in db %}
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.getenv('DB_NAME', 'mysql'),
         'USER': os.getenv('DB_USER', 'root'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'root'),
         'HOST': os.getenv('DB_HOST', 'db'),
         'PORT': os.getenv('DB_PORT', '3306'),
-{%- else -%}
+{% else %}
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-{%- endif %}
+{% endif %}
     }
 }
 
